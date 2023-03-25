@@ -14,6 +14,7 @@ pip install -r requirements.txt
 
 ```
 VK_ACCESS_TOKEN="ваш токен"
+VK_GROUP_ID="id вашей группы в контакте, где будут опубликованы комиксы"
 ```
 
 Для работы API VK необходим токен. Получить его вы можете [здесь](https://vk.com/dev/implicit_flow_user). Для этого вам также необходимо создать свое [приложение ВК](https://vk.com/dev).
