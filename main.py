@@ -3,7 +3,7 @@ import os
 
 from contextlib import suppress
 from dotenv import load_dotenv
-from random import choice
+from random import randint
 
 from funcs import download_comics, get_url_for_vk_publication, publish_comics_on_the_vk_page, \
     upload_comics_to_vk_page, upload_comics_to_vk_server
@@ -12,10 +12,11 @@ from funcs import download_comics, get_url_for_vk_publication, publish_comics_on
 def main():
     load_dotenv()
     access_token = os.environ["VK_ACCESS_TOKEN"]
-    comics_ids = [comics_id for comics_id in range(2754)]
-    random_comics_id = choice(comics_ids)
+    comics_in_total = 2755
+    random_comics_id = randint(1, comics_in_total)
     images_path = 'images'
-    comics_filename = f'{images_path}/{random_comics_id}.png'
+    comics_filename = os.path.join(images_path, str(random_comics_id))
+    comics_path = f'{comics_filename}.png'
     comics_url = f'https://xkcd.com/{random_comics_id}/info.0.json'
 
     with suppress(requests.exceptions):
@@ -25,13 +26,13 @@ def main():
         comics_comments = comics_details['alt']
         comics_image_url = comics_details['img']
 
-        download_comics(comics_image_url, comics_filename)
+        download_comics(comics_image_url, comics_path)
         url_for_vk_publication = get_url_for_vk_publication(access_token)
-        image_details = upload_comics_to_vk_server(url_for_vk_publication, comics_filename)
+        image_details = upload_comics_to_vk_server(url_for_vk_publication, comics_path)
         comics_vk_details = upload_comics_to_vk_page(image_details, access_token)
 
         publish_comics_on_the_vk_page(comics_vk_details, access_token, comics_comments)
-        os.remove(comics_filename)
+        os.remove(comics_path)
 
 
 if __name__ == '__main__':
