@@ -29,11 +29,7 @@ def upload_comic_to_vk_server(url, filename):
     return response.json()
 
 
-def upload_comic_to_vk_page(image_details, token):
-    photo = image_details['photo']
-    server = image_details['server']
-    image_hash = image_details['hash']
-
+def save_comic_image_to_vk(token, server, photo, image_hash):
     url = 'https://api.vk.com/method/photos.saveWallPhoto'
     params = {'access_token': token,
               'group_id': '219570094',
@@ -48,10 +44,7 @@ def upload_comic_to_vk_page(image_details, token):
     return response.json()
 
 
-def publish_comic_on_the_vk_page(image_details, token, comments):
-    dissected_image_details = image_details['response'][0]
-    media_id = dissected_image_details['id']
-    owner_id = dissected_image_details['owner_id']
+def publish_comic_on_the_vk_page(token, comments, owner_id, media_id):
     url = 'https://api.vk.com/method/wall.post'
     params = {
         'access_token': token,

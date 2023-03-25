@@ -5,35 +5,43 @@ from dotenv import load_dotenv
 from random import randint
 
 from funcs import download_comic, get_url_for_vk_publication, publish_comic_on_the_vk_page, \
-    upload_comic_to_vk_page, upload_comic_to_vk_server
+    save_comic_image_to_vk, upload_comic_to_vk_server
 
 
 def main():
     load_dotenv()
     access_token = os.environ["VK_ACCESS_TOKEN"]
     comics_in_total = 2755
-    random_comics_id = randint(1, comics_in_total)
+    random_comic_id = randint(1, comics_in_total)
     images_path = 'images'
-    comics_filename = os.path.join(images_path, str(random_comics_id))
-    comics_path = f'{comics_filename}.png'
-    comics_url = f'https://xkcd.com/{random_comics_id}/info.0.json'
+    comic_filename = os.path.join(images_path, str(random_comic_id))
+    comic_path = f'{comic_filename}.png'
+    comic_url = f'https://xkcd.com/{random_comic_id}/info.0.json'
 
     try:
-        comics_response = requests.get(comics_url)
-        comics_response.raise_for_status()
-        comics_details = comics_response.json()
-        comics_comments = comics_details['alt']
-        comics_image_url = comics_details['img']
+        comic_response = requests.get(comic_url)
+        comic_response.raise_for_status()
+        comic_details = comic_response.json()
+        comic_comments = comic_details['alt']
+        comic_image_url = comic_details['img']
 
-        download_comic(comics_image_url, comics_path)
+        download_comic(comic_image_url, comic_path)
         url_for_vk_publication = get_url_for_vk_publication(access_token)
-        image_details = upload_comic_to_vk_server(url_for_vk_publication, comics_path)
-        comics_vk_details = upload_comic_to_vk_page(image_details, access_token)
-        publish_comic_on_the_vk_page(comics_vk_details, access_token, comics_comments)
+        image_details = upload_comic_to_vk_server(url_for_vk_publication, comic_path)
+        photo = image_details['photo']
+        server = image_details['server']
+        image_hash = image_details['hash']
+        comic_vk_details = save_comic_image_to_vk(access_token, server, photo, image_hash)
+
+        dissected_image_details = comic_vk_details['response'][0]
+        media_id = dissected_image_details['id']
+        owner_id = dissected_image_details['owner_id']
+        publish_comic_on_the_vk_page(access_token, comic_comments, owner_id, media_id)
+
     except requests.exceptions:
         raise Exception('Error occured, please try again.')
     finally:
-        os.remove(comics_path)
+        os.remove(comic_path)
 
 
 if __name__ == '__main__':
