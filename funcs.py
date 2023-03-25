@@ -16,6 +16,7 @@ def get_url_for_vk_publication(token, vk_group_id):
               }
     response = requests.get(url, params=params)
     response.raise_for_status()
+    handle_vk_api_exceptions(response)
     return response.json()['response']['upload_url']
 
 
@@ -26,6 +27,7 @@ def upload_comic_to_vk_server(url, filename):
         }
         response = requests.post(url, files=files)
     response.raise_for_status()
+    handle_vk_api_exceptions(response)
     return response.json()
 
 
@@ -41,6 +43,7 @@ def save_comic_image_to_vk(token, server, photo, image_hash, vk_group_id):
 
     response = requests.post(url, params=params)
     response.raise_for_status()
+    handle_vk_api_exceptions(response)
     return response.json()
 
 
@@ -55,4 +58,10 @@ def publish_comic_on_the_vk_page(token, comments, owner_id, media_id, vk_group_i
         'message': comments
     }
     response = requests.post(url, params=params)
+    handle_vk_api_exceptions(response)
     response.raise_for_status()
+
+
+def handle_vk_api_exceptions(response):
+    if 'error' in response:
+        raise Exception('Error occured. Please try again.')
