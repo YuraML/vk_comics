@@ -1,12 +1,11 @@
 import requests
 import os
 
-from contextlib import suppress
 from dotenv import load_dotenv
 from random import randint
 
-from funcs import download_comics, get_url_for_vk_publication, publish_comics_on_the_vk_page, \
-    upload_comics_to_vk_page, upload_comics_to_vk_server
+from funcs import download_comic, get_url_for_vk_publication, publish_comic_on_the_vk_page, \
+    upload_comic_to_vk_page, upload_comic_to_vk_server
 
 
 def main():
@@ -19,19 +18,21 @@ def main():
     comics_path = f'{comics_filename}.png'
     comics_url = f'https://xkcd.com/{random_comics_id}/info.0.json'
 
-    with suppress(requests.exceptions):
+    try:
         comics_response = requests.get(comics_url)
         comics_response.raise_for_status()
         comics_details = comics_response.json()
         comics_comments = comics_details['alt']
         comics_image_url = comics_details['img']
 
-        download_comics(comics_image_url, comics_path)
+        download_comic(comics_image_url, comics_path)
         url_for_vk_publication = get_url_for_vk_publication(access_token)
-        image_details = upload_comics_to_vk_server(url_for_vk_publication, comics_path)
-        comics_vk_details = upload_comics_to_vk_page(image_details, access_token)
-
-        publish_comics_on_the_vk_page(comics_vk_details, access_token, comics_comments)
+        image_details = upload_comic_to_vk_server(url_for_vk_publication, comics_path)
+        comics_vk_details = upload_comic_to_vk_page(image_details, access_token)
+        publish_comic_on_the_vk_page(comics_vk_details, access_token, comics_comments)
+    except requests.exceptions:
+        raise Exception('Error occured, please try again.')
+    finally:
         os.remove(comics_path)
 
 
